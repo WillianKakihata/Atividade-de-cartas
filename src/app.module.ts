@@ -6,9 +6,10 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { MiddlewareConsumer } from '@nestjs/common';
 import { ResLogger } from './res-logger.middleware';
+import { CardsModule } from './cards/cards.module';
 
 @Module({
-  imports: [MongooseModule.forRoot('mongodb://0.0.0.0/magicAtividade'), AuthModule, UsersModule],
+  imports: [MongooseModule.forRoot('mongodb://0.0.0.0/magicAtividade'), AuthModule, UsersModule, CardsModule],
   controllers: [AppController],
   providers: [AppService],
 })
