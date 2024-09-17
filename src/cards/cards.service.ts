@@ -1,9 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { CreateCardsDto } from "./dto/create-cards.dto";
 import axios, { AxiosResponse } from "axios";
+import { InjectModel } from "@nestjs/mongoose";
+import { Model } from "mongoose";
+import { Cards } from "./cards.schema";
 
 @Injectable()
 export class CardsService {
+  constructor(@InjectModel('cards') private readonly cardsModel: Model<Cards>) {} 
+
+  async create(createCardDto: CreateCardsDto): Promise<Cards> {
+    const card = new this.cardsModel(createCardDto); 
+    return await card.save();  
+  }
 
     async generate(): Promise<CreateCardsDto> {
         const cardCommander = await this.apigetCommander();
@@ -11,10 +20,12 @@ export class CardsService {
         const nonLegendaryCards = await this.get99NonLegendaryCards(cardCommander.colors || []);
         const cardNames = nonLegendaryCards.map(this.getCardName);
     
-        return {
-          cardCommander: commanderName,
-          cards: cardNames,
+        const cards: CreateCardsDto = {
+          "cardCommander": commanderName,
+          "cards": cardNames,
         };
+
+        return cards;
       }
     
       private async apigetCommander(): Promise<any> {

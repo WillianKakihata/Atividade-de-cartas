@@ -1,11 +1,13 @@
-import { Prop, Schema, SchemaFactory, raw } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from 'mongoose';
 
 @Schema()
-export class cards{
-    @Prop()
-    CardCommander: string;
+export class Cards extends Document {
+    @Prop({ required: true })  
+    cardCommander: string;
 
-    @Prop()
+    @Prop({ type: [String], default: [] })  
     cards: string[];
-    
 }
+
+export const CardsSchema = SchemaFactory.createForClass(Cards);

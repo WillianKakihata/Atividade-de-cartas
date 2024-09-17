@@ -7,3 +7,4 @@ export class UpdateCardsDto{
     @IsArray()
     cards: string[];
 }
+
