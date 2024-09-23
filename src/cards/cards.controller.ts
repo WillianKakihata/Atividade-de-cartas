@@ -2,12 +2,17 @@ import { Controller, Get, HttpException, HttpStatus, Post, UseGuards } from '@ne
 import { CardsService } from './cards.service';
 import { CreateCardsDto } from './dto/create-cards.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Roles } from 'src/decorators/roles.decorators';
+import { UserType } from 'src/users/enum/user-type.enum';
+import { RolesGuard } from 'src/guards/roles.guards';
 
-@UseGuards(AuthGuard)
+
+@UseGuards(AuthGuard, RolesGuard)
 @Controller('cards')
 export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
 
+  @Roles(UserType.Admin)
   @Get('generate')
   async generateCards(): Promise<CreateCardsDto> {
     try {
