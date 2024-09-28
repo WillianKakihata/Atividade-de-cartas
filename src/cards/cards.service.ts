@@ -9,12 +9,12 @@ import { Cards } from "./cards.schema";
 export class CardsService {
   constructor(@InjectModel('cards') private readonly cardsModel: Model<Cards>) {} 
 
-  async create(createCardDto: CreateCardsDto): Promise<Cards> {
-    const card = new this.cardsModel(createCardDto); 
-    return await card.save();  
-  }
+      async create(createCardDto: CreateCardsDto): Promise<Cards> {
+        const card = new this.cardsModel(createCardDto); 
+        return await card.save();  
+      }
 
-    async generate(): Promise<CreateCardsDto> {
+      async generate(): Promise<CreateCardsDto> {
         const cardCommander = await this.apigetCommander();
         const commanderName = this.getCardName(cardCommander);
         const nonLegendaryCards = await this.get99NonLegendaryCards(cardCommander.colors || []);
