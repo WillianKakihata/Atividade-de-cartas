@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schemas/user.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,11 +9,17 @@ import { Model } from 'mongoose';
 export class UsersService {
     constructor(@InjectModel(User.name) private readonly userModel: Model<User>){}
 
-    async create(createUserDto: CreateUserDto): Promise<boolean>{
+    async create(createUserDto: CreateUserDto): Promise<boolean> {
         if (await this.findUser(createUserDto.username)) return false;
-        const char = new this.userModel(createUserDto);
-        await char.save();
-        return true;
+        
+        try {
+            const user = new this.userModel(createUserDto);
+            await user.save();
+            return true;
+        } catch (error) {
+            console.error('Erro ao salvar o usuário:', error); 
+            throw new HttpException('Erro ao criar usuário', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     async findUser(user: string): Promise<User>{

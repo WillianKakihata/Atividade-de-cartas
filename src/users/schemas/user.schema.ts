@@ -8,19 +8,19 @@ export class User extends Document {
     @Prop({ type: mongoose.Schema.Types.ObjectId, auto: true })
     _id: mongoose.Schema.Types.ObjectId;
 
-    @Prop({ required: true, unique: true })
+    @Prop()
     username: string;
 
-    @Prop({ required: true })
+    @Prop()
     password: string;
 
     @Prop({ type: [String], enum: UserType, default: [UserType.User] }) 
     roles: UserType[];
 
-    @Prop({ required: true })
+    @Prop()
     name: string;
 
-    @Prop({ required: true, unique: true })
+    @Prop()
     email: string;
 }
 
