@@ -37,4 +37,20 @@ export class CardsController {
       );
     }
   }
+
+  @Roles(UserType.Admin)
+  @Get('find')
+  async findCards():Promise<any>{
+    try {
+      const cards = await this.cardsService.find()
+      return cards
+    } catch (error) {
+      throw new HttpException(
+        { message: 'Erro ao encontrar baralhos' },
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
+
+
 }

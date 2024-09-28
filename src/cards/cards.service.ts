@@ -58,4 +58,12 @@ export class CardsService {
         }
         return randomCards;
       }
+
+      async find(){
+        try{
+            return await this.cardsModel.find({});
+        }catch(e){
+            return null;
+        }
+    }
 }
