@@ -1,9 +1,12 @@
-import { IsArray, IsString } from "class-validator";
+import { IsArray, IsOptional, IsString } from "class-validator";
 
 export class CreateCardsDto {
-    @IsString()
-    cardCommander: string;
+  @IsString()
+  cardCommander: string;
 
-    @IsArray()
-    cards: string[];
+  @IsArray()
+  cards: string[];
+
+  @IsString()
+  userId: string; 
 }

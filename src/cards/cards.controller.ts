@@ -1,11 +1,10 @@
-import { Controller, Get, HttpException, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpException, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
 import { CardsService } from './cards.service';
 import { CreateCardsDto } from './dto/create-cards.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/decorators/roles.decorators';
 import { UserType } from 'src/users/enum/user-type.enum';
 import { RolesGuard } from 'src/guards/roles.guards';
-
 
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('cards')
@@ -26,13 +25,15 @@ export class CardsController {
   }
 
   @Post()
-  async create(): Promise<CreateCardsDto> {
+  async create(@Request() req): Promise<CreateCardsDto> {
     try {
       const generatedCards = await this.cardsService.generate(); 
-      return await this.cardsService.create(generatedCards); 
+      const userId = req.user.userId; 
+      return await this.cardsService.create(generatedCards, req); 
     } catch (e) {
+      console.error('Erro ao criar cartas:', e);
       throw new HttpException(
-        { message: 'Erro ao criar as cartas' },
+        { message: 'Erro ao criar as cartas', error: e.message },
         HttpStatus.BAD_REQUEST
       );
     }
@@ -40,10 +41,10 @@ export class CardsController {
 
   @Roles(UserType.Admin)
   @Get('find')
-  async findCards():Promise<any>{
+  async findCards(): Promise<any> {
     try {
-      const cards = await this.cardsService.find()
-      return cards
+      const cards = await this.cardsService.find();
+      return cards;
     } catch (error) {
       throw new HttpException(
         { message: 'Erro ao encontrar baralhos' },
@@ -52,5 +53,10 @@ export class CardsController {
     }
   }
 
+  @Get('my-decks')
+  async getMyDecks() {
+    const decks = await this.cardsService.findDecksByUser();
+    return decks;
+  }
 
 }

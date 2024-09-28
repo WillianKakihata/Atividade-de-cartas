@@ -2,13 +2,15 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CardsService } from './cards.service';
 import { CardsController } from './cards.controller';
-import { CardsSchema } from './cards.schema';
+import { Cards, CardsSchema } from './cards.schema';
+import { ContextService } from 'src/auth/context.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'cards', schema: CardsSchema }]), 
+    MongooseModule.forFeature([{ name: Cards.name, schema: CardsSchema }]), 
   ],
-  providers: [CardsService],
   controllers: [CardsController],
+  providers: [CardsService, ContextService],
+  exports: [CardsService],
 })
 export class CardsModule {}
