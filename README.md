@@ -94,3 +94,5 @@ UserAlreadyExistsException: Lançada quando uma tentativa de criar um usuário c
 Considerações Finais
 Esta documentação fornece uma visão geral dos principais controladores e suas funcionalidades. Para mais detalhes sobre a implementação, consulte o código-fonte do projeto. Caso haja necessidade de ajustes ou novas funcionalidades, recomenda-se a revisão da lógica de negócios e das validações.
 
+Testes
+npm run test
