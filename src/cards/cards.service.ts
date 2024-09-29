@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { CreateCardsDto } from "./dto/create-cards.dto";
 import axios, { AxiosResponse } from "axios";
 import { InjectModel } from "@nestjs/mongoose";
@@ -16,9 +16,13 @@ export class CardsService {
   ) {}
 
   async create(createCardDto: CreateCardsDto, request: Request): Promise<Cards> {
-    const userId = this.contextService.getUserId(); 
-    const card = new this.cardsModel({ ...createCardDto, userId }); 
-    return await card.save();  
+    const userId = this.contextService.getUserId();
+    this.validateDeck(createCardDto);
+    const card = new this.cardsModel({
+      ...createCardDto,
+      userId,
+    });
+    return await card.save();
   }
 
   async generate(): Promise<CreateCardsDto> {
@@ -39,33 +43,81 @@ export class CardsService {
 
   private async apigetCommander(): Promise<any> {
     const response: AxiosResponse = await axios.get(
-      'https://api.magicthegathering.io/v1/cards?supertypes=legendary',
+        'https://api.magicthegathering.io/v1/cards?supertypes=legendary&types=creature'
     );
     const commanderCards = response.data.cards;
+    if (commanderCards.length === 0) {
+        throw new BadRequestException("Nenhuma criatura lendária encontrada.");
+    }
     return commanderCards[Math.floor(Math.random() * commanderCards.length)];
-  }
+}
 
   private async get99NonLegendaryCards(colors: string[]): Promise<any[]> {
     const colorQuery = colors.join(',');
-    const response: AxiosResponse = await axios.get(
-      `https://api.magicthegathering.io/v1/cards?colors=${colorQuery}&supertypes!=legendary`,
-    );
-    const nonLegendaryCards = response.data.cards;
+    const allNonLegendaryCards = [];
+    const maxPages = 3; 
+    let currentPage = 1;
 
-    return this.getRandomCards(nonLegendaryCards, 99);
+    while (currentPage <= maxPages) {
+        const response: AxiosResponse = await axios.get(
+            `https://api.magicthegathering.io/v1/cards?colors=${colorQuery}&supertypes!=legendary&page=${currentPage}`
+        );
+        const nonLegendaryCards = response.data.cards;
+
+        if (nonLegendaryCards.length === 0) {
+            break;
+        }
+
+        allNonLegendaryCards.push(...nonLegendaryCards);
+        currentPage++;
+    }
+
+    console.log('Total de cartas não lendárias retornadas:', allNonLegendaryCards.length);
+    return this.getRandomCards(allNonLegendaryCards, 99);
+}
+
+private getRandomCards(cards: any[], count: number): any[] {
+  const selectedCards = new Set();
+
+  while (selectedCards.size < count) {
+      const randomIndex = Math.floor(Math.random() * cards.length);
+      const randomCard = cards[randomIndex];
+
+      if (!selectedCards.has(randomCard.name)) {
+          selectedCards.add(randomCard.name);
+      } else {
+          let newCardFound = false;
+          for (let i = 0; i < cards.length; i++) {
+              const newRandomCard = cards[Math.floor(Math.random() * cards.length)];
+              if (!selectedCards.has(newRandomCard.name)) {
+                  selectedCards.delete(randomCard.name); 
+                  selectedCards.add(newRandomCard.name); 
+                  console.log(`Substituindo ${randomCard.name} por ${newRandomCard.name}`);
+                  newCardFound = true;
+                  break; 
+              }
+          }
+          if (!newCardFound && selectedCards.size < count) {
+              console.warn('Não há mais cartas disponíveis para substituir.');
+              break;
+          }
+      }
+
+      if (selectedCards.size >= cards.length) {
+          console.warn('Todas as cartas disponíveis foram selecionadas. Adicione mais cartas.');
+          break;
+      }
   }
 
+  if (selectedCards.size !== count) {
+      throw new BadRequestException('Não há cartas suficientes para completar o baralho. O baralho deve conter exatamente 99 cartas além do comandante.');
+  }
+
+  return Array.from(selectedCards).map(name => cards.find(card => card.name === name));
+}
+  
   private getCardName(card: any): string {
     return card.name;
-  }
-
-  private getRandomCards(cards: any[], count: number): any[] {
-    const randomCards = [];
-    for (let i = 0; i < count; i++) {
-      const randomCard = cards[Math.floor(Math.random() * cards.length)];
-      randomCards.push(randomCard);
-    }
-    return randomCards;
   }
 
   async find(): Promise<Cards[]> {
@@ -92,5 +144,72 @@ export class CardsService {
       return null;
     }
   }
+  
+  private async validateDeck(createCardDto: CreateCardsDto): Promise<void> {
+    const { cardCommander, cards } = createCardDto;
+  
+
+    if (!await this.isLegendaryCreature(cardCommander)) {
+      throw new BadRequestException("O comandante não é uma criatura lendária.");
+    }
+  
+    if (cards.length !== 99) {
+      throw new BadRequestException("O baralho deve conter exatamente 99 cartas além do comandante.");
+    }
+  
+    const commanderColors = await this.getCommanderColors(cardCommander);
+    const invalidCards = cards.filter(card => !this.isCardInCommanderColors(card, commanderColors));
+    if (invalidCards.length > 0) {
+      throw new BadRequestException(`As seguintes cartas não seguem a identidade de cor do comandante: ${invalidCards.join(', ')}`);
+    }
+  
+    const cardCounts = this.countCards(cards);
+    const duplicateCards = Object.keys(cardCounts).filter(card => cardCounts[card] > 1 && !this.isBasicLand(card));
+    if (duplicateCards.length > 0) {
+      throw new BadRequestException(`O baralho contém cartas duplicadas, exceto terrenos básicos: ${duplicateCards.join(', ')}`);
+    }
+  }
+  
+  private async isLegendaryCreature(cardCommander: string): Promise<boolean> {
+    const response = await axios.get(`https://api.magicthegathering.io/v1/cards?name=${encodeURIComponent(cardCommander)}`);
+    const cardData = response.data.cards.find(card => card.name === cardCommander);
+    return cardData && cardData.supertypes.includes('Legendary') && cardData.types.includes('Creature');
+  }
+  
+  private async getCommanderColors(cardCommander: string): Promise<string[]> {
+
+    const response = await axios.get(`https://api.magicthegathering.io/v1/cards?name=${encodeURIComponent(cardCommander)}`);
+    const cardData = response.data.cards.find(card => card.name === cardCommander);
+    return cardData ? cardData.colors || [] : [];
+  }
+  
+  private isCardInCommanderColors(card: string, commanderColors: string[]): boolean {
+
+    const cardColors = this.getCardColors(card);
+    return cardColors.every(color => commanderColors.includes(color));
+  }
+  
+  private getCardColors(card: string): string[] {
+    const mockCardColors: { [key: string]: string[] } = {
+      "Plains": ["W"],
+      "Island": ["U"],
+      "Swamp": ["B"],
+      "Mountain": ["R"],
+      "Forest": ["G"],
+    };
+    return mockCardColors[card] || [];
+  }
+  
+  private countCards(cards: string[]): { [card: string]: number } {
+    return cards.reduce((acc, card) => {
+      acc[card] = (acc[card] || 0) + 1;
+      return acc;
+    }, {});
+  }
+  
+  private isBasicLand(card: string): boolean {
+    return ["Plains", "Island", "Swamp", "Mountain", "Forest"].includes(card);
+  }
+
   
 }

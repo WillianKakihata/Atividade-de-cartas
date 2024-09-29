@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
 import { CardsService } from './cards.service';
 import { CreateCardsDto } from './dto/create-cards.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -59,4 +59,15 @@ export class CardsController {
     return decks;
   }
 
+  @Post('import')
+  async importDeck(@Body() createCardsDto: CreateCardsDto,@Request() req): Promise<any> {
+    try {
+      return await this.cardsService.create(createCardsDto,req);
+    } catch (e) {
+      throw new HttpException(
+        { message: 'Erro ao importar o baralho', error: e.message },
+        HttpStatus.BAD_REQUEST
+      );
+    }
+  }
 }
