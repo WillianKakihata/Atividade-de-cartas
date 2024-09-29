@@ -1,85 +1,96 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+Documentação do Software
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Visão Geral
+Este software é um sistema baseado em NestJS que gerencia a criação e manipulação de cartas e baralhos. Ele inclui funcionalidades de autenticação e gerenciamento de usuários, permitindo que os usuários interajam com cartas e baralhos de maneira controlada.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Então para iniciar o projeto em nest.js
+npm i
+utilize npm start:dev
+navegar os endpoints
+localhost: http://localhost:3000/ <endpoints>
 
-## Description
+Estrutura do Projeto
+O projeto é dividido em três principais controladores:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+CardsController
+AuthController
+UsersController
+1. CardsController
+O CardsController gerencia as operações relacionadas às cartas e baralhos.
 
-## Project setup
+Endpoints
+GET /cards/generate
 
-```bash
-$ npm install
-```
+Descrição: Gera um novo conjunto de cartas.
+Autorização: Apenas usuários com o papel de Admin.
+Resposta: Retorna um conjunto de cartas geradas.
+Exceções:
+500 Internal Server Error: Se ocorrer um erro ao gerar as cartas.
+POST /cards
 
-## Compile and run the project
+Descrição: Cria novas cartas baseadas nas cartas geradas.
+Autorização: Usuário autenticado.
+Resposta: Retorna as cartas criadas.
+Exceções:
+400 Bad Request: Se ocorrer um erro ao criar as cartas.
+GET /cards/find
 
-```bash
-# development
-$ npm run start
+Descrição: Encontra todos os baralhos disponíveis.
+Autorização: Apenas usuários com o papel de Admin.
+Resposta: Retorna todos os baralhos.
+Exceções:
+400 Bad Request: Se ocorrer um erro ao encontrar baralhos.
+GET /cards/my-decks
 
-# watch mode
-$ npm run start:dev
+Descrição: Retorna os baralhos do usuário autenticado.
+Autorização: Usuário autenticado.
+Resposta: Retorna os baralhos do usuário.
+POST /cards/import
 
-# production mode
-$ npm run start:prod
-```
+Descrição: Importa um baralho via JSON.
+Autorização: Usuário autenticado.
+Resposta: Retorna o baralho importado.
+Exceções:
+400 Bad Request: Se ocorrer um erro ao importar o baralho.
+2. AuthController
+O AuthController gerencia a autenticação dos usuários.
 
-## Run tests
+Endpoints
+POST /auth/login
+Descrição: Realiza o login do usuário.
+Requisição: Deve conter username e password no corpo da solicitação.
+Resposta: Retorna um token de autenticação se bem-sucedido.
+Exceções:
+401 Unauthorized: Se as credenciais estiverem incorretas.
+3. UsersController
+O UsersController gerencia as operações relacionadas aos usuários.
 
-```bash
-# unit tests
-$ npm run test
+Endpoints
+POST /user
 
-# e2e tests
-$ npm run test:e2e
+Descrição: Cria um novo usuário.
+Requisição: Deve conter os dados do usuário no corpo da solicitação.
+Resposta: Mensagem de sucesso se o usuário for criado.
+Exceções:
+409 Conflict: Se o usuário já existir.
+500 Internal Server Error: Se ocorrer um erro inesperado.
+POST /user/
 
-# test coverage
-$ npm run test:cov
-```
+Descrição: Atualiza os dados de um usuário existente.
+Requisição: Deve conter os novos dados do usuário no corpo da solicitação.
+Parâmetro: username - Nome de usuário do usuário a ser atualizado.
+Resposta: Mensagem de sucesso se o usuário for atualizado.
+Exceções:
+500 Internal Server Error: Se ocorrer um erro inesperado.
+DELETE /user/
 
-## Resources
+Descrição: Remove um usuário.
+Parâmetro: username - Nome de usuário do usuário a ser removido.
+Resposta: 204 No Content se a remoção for bem-sucedida.
+Exceções:
+500 Internal Server Error: Se ocorrer um erro inesperado.
+Exceções Personalizadas
+UserAlreadyExistsException: Lançada quando uma tentativa de criar um usuário com um nome de usuário que já existe é realizada.
+Considerações Finais
+Esta documentação fornece uma visão geral dos principais controladores e suas funcionalidades. Para mais detalhes sobre a implementação, consulte o código-fonte do projeto. Caso haja necessidade de ajustes ou novas funcionalidades, recomenda-se a revisão da lógica de negócios e das validações.
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
