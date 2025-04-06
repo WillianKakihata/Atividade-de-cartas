@@ -1,98 +1,140 @@
-Documentação do Software
+# 🃏 Sistema de Gerenciamento de Cartas e Baralhos (NestJS)
 
-Visão Geral
-Este software é um sistema baseado em NestJS que gerencia a criação e manipulação de cartas e baralhos. Ele inclui funcionalidades de autenticação e gerenciamento de usuários, permitindo que os usuários interajam com cartas e baralhos de maneira controlada.
+Este projeto é uma API RESTful desenvolvida com **NestJS**, focada no gerenciamento de **cartas** e **baralhos**, com autenticação de usuários e controle de permissões.
 
-Então para iniciar o projeto em nest.js
-npm i
-utilize npm start:dev
-navegar os endpoints
-localhost: http://localhost:3000/ <endpoints>
+## 🚀 Visão Geral
 
-Estrutura do Projeto
-O projeto é dividido em três principais controladores:
+O sistema permite que usuários criem, importem e manipulem cartas e baralhos. Possui autenticação baseada em **JWT** e gerenciamento de usuários, com restrições de acesso baseadas em papéis (Admin e Usuário).
 
-CardsController
-AuthController
-UsersController
-1. CardsController
-O CardsController gerencia as operações relacionadas às cartas e baralhos.
+---
 
-Endpoints
-GET /cards/generate
+## 🛠️ Tecnologias Utilizadas
 
-Descrição: Gera um novo conjunto de cartas.
-Autorização: Apenas usuários com o papel de Admin.
-Resposta: Retorna um conjunto de cartas geradas.
-Exceções:
-500 Internal Server Error: Se ocorrer um erro ao gerar as cartas.
-POST /cards
+- [NestJS](https://nestjs.com/)
+- TypeScript
+- JWT (para autenticação)
+- Class Validator (validações)
+- Docker (opcional)
 
-Descrição: Cria novas cartas baseadas nas cartas geradas.
-Autorização: Usuário autenticado.
-Resposta: Retorna as cartas criadas.
-Exceções:
-400 Bad Request: Se ocorrer um erro ao criar as cartas.
-GET /cards/find
+---
 
-Descrição: Encontra todos os baralhos disponíveis.
-Autorização: Apenas usuários com o papel de Admin.
-Resposta: Retorna todos os baralhos.
-Exceções:
-400 Bad Request: Se ocorrer um erro ao encontrar baralhos.
-GET /cards/my-decks
+## ▶️ Como Executar o Projeto
 
-Descrição: Retorna os baralhos do usuário autenticado.
-Autorização: Usuário autenticado.
-Resposta: Retorna os baralhos do usuário.
-POST /cards/import
+1. Instale as dependências:
 
-Descrição: Importa um baralho via JSON.
-Autorização: Usuário autenticado.
-Resposta: Retorna o baralho importado.
-Exceções:
-400 Bad Request: Se ocorrer um erro ao importar o baralho.
-2. AuthController
-O AuthController gerencia a autenticação dos usuários.
+```bash
+npm install
+```
 
-Endpoints
-POST /auth/login
-Descrição: Realiza o login do usuário.
-Requisição: Deve conter username e password no corpo da solicitação.
-Resposta: Retorna um token de autenticação se bem-sucedido.
-Exceções:
-401 Unauthorized: Se as credenciais estiverem incorretas.
-3. UsersController
-O UsersController gerencia as operações relacionadas aos usuários.
+2. Inicie o servidor em modo de desenvolvimento:
 
-Endpoints
-POST /user
+```bash
+npm run start:dev
+```
 
-Descrição: Cria um novo usuário.
-Requisição: Deve conter os dados do usuário no corpo da solicitação.
-Resposta: Mensagem de sucesso se o usuário for criado.
-Exceções:
-409 Conflict: Se o usuário já existir.
-500 Internal Server Error: Se ocorrer um erro inesperado.
-POST /user/
+3. Acesse a API via:  
+[http://localhost:3000](http://localhost:3000)
 
-Descrição: Atualiza os dados de um usuário existente.
-Requisição: Deve conter os novos dados do usuário no corpo da solicitação.
-Parâmetro: username - Nome de usuário do usuário a ser atualizado.
-Resposta: Mensagem de sucesso se o usuário for atualizado.
-Exceções:
-500 Internal Server Error: Se ocorrer um erro inesperado.
-DELETE /user/
+---
 
-Descrição: Remove um usuário.
-Parâmetro: username - Nome de usuário do usuário a ser removido.
-Resposta: 204 No Content se a remoção for bem-sucedida.
-Exceções:
-500 Internal Server Error: Se ocorrer um erro inesperado.
-Exceções Personalizadas
-UserAlreadyExistsException: Lançada quando uma tentativa de criar um usuário com um nome de usuário que já existe é realizada.
-Considerações Finais
-Esta documentação fornece uma visão geral dos principais controladores e suas funcionalidades. Para mais detalhes sobre a implementação, consulte o código-fonte do projeto. Caso haja necessidade de ajustes ou novas funcionalidades, recomenda-se a revisão da lógica de negócios e das validações.
+## 📁 Estrutura do Projeto
 
-Testes
+- `cards/`: Gerenciamento de cartas e baralhos
+- `auth/`: Lógica de autenticação
+- `user/`: Operações com usuários
+
+---
+
+## 📌 Endpoints
+
+### 📄 CardsController
+
+#### `GET /cards/generate`
+- **Descrição:** Gera um novo conjunto de cartas.
+- **Permissão:** Admin
+- **Resposta:** Cartas geradas.
+- **Erros:** `500 Internal Server Error`
+
+#### `POST /cards`
+- **Descrição:** Cria cartas com base nas cartas geradas.
+- **Permissão:** Autenticado
+- **Resposta:** Cartas criadas.
+- **Erros:** `400 Bad Request`
+
+#### `GET /cards/find`
+- **Descrição:** Lista todos os baralhos disponíveis.
+- **Permissão:** Admin
+- **Resposta:** Lista de baralhos.
+- **Erros:** `400 Bad Request`
+
+#### `GET /cards/my-decks`
+- **Descrição:** Retorna os baralhos do usuário autenticado.
+- **Permissão:** Autenticado
+- **Resposta:** Baralhos do usuário.
+
+#### `POST /cards/import`
+- **Descrição:** Importa um baralho a partir de um JSON.
+- **Permissão:** Autenticado
+- **Resposta:** Baralho importado.
+- **Erros:** `400 Bad Request`
+
+---
+
+### 🔐 AuthController
+
+#### `POST /auth/login`
+- **Descrição:** Realiza login do usuário.
+- **Body:** `{ "username": "user", "password": "pass" }`
+- **Resposta:** Token JWT
+- **Erros:** `401 Unauthorized`
+
+---
+
+### 👤 UsersController
+
+#### `POST /user`
+- **Descrição:** Cria um novo usuário.
+- **Body:** Dados do novo usuário.
+- **Resposta:** Sucesso.
+- **Erros:** `409 Conflict`, `500 Internal Server Error`
+
+#### `POST /user/:username`
+- **Descrição:** Atualiza dados do usuário.
+- **Body:** Novos dados.
+- **Parâmetro:** `username`
+- **Resposta:** Sucesso.
+- **Erros:** `500 Internal Server Error`
+
+#### `DELETE /user/:username`
+- **Descrição:** Remove um usuário.
+- **Parâmetro:** `username`
+- **Resposta:** `204 No Content`
+- **Erros:** `500 Internal Server Error`
+
+---
+
+## ❗ Exceções Personalizadas
+
+- **`UserAlreadyExistsException`**: Lançada quando o nome de usuário já está em uso.
+
+---
+
+## 🧪 Testes
+
+Execute os testes com:
+
+```bash
 npm run test
+```
+
+---
+
+## 📌 Considerações Finais
+
+Este projeto foi desenvolvido com foco na modularidade, escalabilidade e segurança. Para detalhes mais técnicos, consulte o código-fonte. Caso precise de novas funcionalidades, recomenda-se revisar a lógica de negócios e as validações associadas.
+
+---
+
+## 📬 Contato
+
+Em caso de dúvidas, sugestões ou contribuições, sinta-se à vontade para abrir uma issue ou enviar um pull request.
